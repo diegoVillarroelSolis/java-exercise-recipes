@@ -1,6 +1,7 @@
 package com.sample.recipes.services;
 
 import com.sample.recipes.domain.User;
+import com.sample.recipes.domain.dto.UserDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,7 +20,16 @@ public class UsersService {
         return users;
     }
 
-    public User updateUser(long id, User user) {
-        
+    public User updateUser(long id, UserDTO updatedUser) {
+        User user = users.get((int)id);
+        if(user.getDateOfBirth() != null)
+            user.setDateOfBirth(updatedUser.getDateOfBirth());
+        if(!user.getEmail().isEmpty())
+            user.setEmail(updatedUser.getEmail());
+        if(!user.getName().isEmpty())
+            user.setName(updatedUser.getName());
+        if(!user.getPassword().isEmpty())
+            user.setPassword(updatedUser.getPassword());
+        return user;
     }
 }

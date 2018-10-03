@@ -1,6 +1,7 @@
 package com.sample.recipes.web;
 
 import com.sample.recipes.domain.User;
+import com.sample.recipes.domain.dto.UserDTO;
 import com.sample.recipes.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,7 @@ public class UsersController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<User> updateUser(@PathVariable long id, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable long id, @RequestBody UserDTO user) {
         try {
             User updatedUser = usersService.updateUser(id, user);
             return new ResponseEntity<>(updatedUser, HttpStatus.ACCEPTED);
