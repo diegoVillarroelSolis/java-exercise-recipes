@@ -1,7 +1,10 @@
 package com.sample.recipes.web;
 
+import com.sample.recipes.domain.Recipe;
 import com.sample.recipes.domain.User;
+import com.sample.recipes.domain.dto.RecipeDTO;
 import com.sample.recipes.domain.dto.UserDTO;
+import com.sample.recipes.services.RecipesService;
 import com.sample.recipes.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,9 +20,11 @@ import java.util.List;
 public class UsersController {
     @Autowired
     private UsersService usersService;
+    @Autowired
+    private RecipesService recipesService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<User> registerUser(@Valid @RequestBody User user) {
+    public ResponseEntity<User> registerUser(@Valid @RequestBody UserDTO user) {
         try {
             User newUser = usersService.addUser(user);
             return new ResponseEntity<>(newUser, HttpStatus.ACCEPTED);
@@ -30,7 +35,7 @@ public class UsersController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<User>> registerUser() {
+    public ResponseEntity<List<User>> getUsers() {
         try {
             List<User> users = usersService.getUsers();
             return new ResponseEntity<>(users, HttpStatus.ACCEPTED);

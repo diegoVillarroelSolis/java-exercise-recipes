@@ -1,11 +1,16 @@
 package com.sample.recipes.domain.dto;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 public class UserDTO {
+    @NotNull
     private String name;
+    @NotNull
     private Date dateOfBirth;
+    @NotNull
     private String email;
+    @NotNull
     private String password;
 
     public String getName() {

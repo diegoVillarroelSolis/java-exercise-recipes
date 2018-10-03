@@ -4,6 +4,7 @@ import com.sample.recipes.domain.User;
 import com.sample.recipes.domain.dto.UserDTO;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,9 +12,14 @@ import java.util.List;
 public class UsersService {
     private List<User> users = new ArrayList<>();
 
-    public User addUser(User user) {
-        users.add(user);
-        return user;
+    public User addUser(@Valid UserDTO user) {
+        User newUser = new User();
+        newUser.setDateOfBirth(user.getDateOfBirth());
+        newUser.setEmail(user.getEmail());
+        newUser.setName(user.getName());
+        newUser.setPassword(user.getPassword());
+        users.add(newUser);
+        return newUser;
     }
 
     public List<User> getUsers() {
@@ -22,14 +28,20 @@ public class UsersService {
 
     public User updateUser(long id, UserDTO updatedUser) {
         User user = users.get((int)id);
-        if(user.getDateOfBirth() != null)
-            user.setDateOfBirth(updatedUser.getDateOfBirth());
-        if(!user.getEmail().isEmpty())
-            user.setEmail(updatedUser.getEmail());
-        if(!user.getName().isEmpty())
-            user.setName(updatedUser.getName());
-        if(!user.getPassword().isEmpty())
-            user.setPassword(updatedUser.getPassword());
+        user.setDateOfBirth(updatedUser.getDateOfBirth());
+        user.setEmail(updatedUser.getEmail());
+        user.setName(updatedUser.getName());
+        user.setPassword(updatedUser.getPassword());
         return user;
+    }
+
+    public User getUserById(long userId) {
+        if(existsUser(userId))
+            return users.get((int) userId);
+        return null;
+    }
+
+    private boolean existsUser(long userId) {
+        return userId >= 0 && userId < users.size();
     }
 }
