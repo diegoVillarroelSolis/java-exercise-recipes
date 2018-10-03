@@ -3,19 +3,22 @@ package com.sample.recipes.services;
 import com.sample.recipes.domain.Recipe;
 import com.sample.recipes.domain.User;
 import com.sample.recipes.domain.dto.RecipeDTO;
+import com.sample.recipes.persistence.RecipesRepository;
+import com.sample.recipes.persistence.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RecipesService {
     @Autowired
     private UsersService usersService;
-
-    private List<Recipe> recipes = new ArrayList<Recipe>();
+    @Autowired
+    private RecipesRepository recipesRepository;
 
     public Recipe addRecipe(@Valid RecipeDTO recipe) {
         Recipe newRecipe = new Recipe();
@@ -25,38 +28,38 @@ public class RecipesService {
         if(!recipe.getDescription().isEmpty())
             newRecipe.setDescription(recipe.getDescription());
         newRecipe.setUser(user);
-        recipes.add(newRecipe);
-        return newRecipe;
+        return recipesRepository.save(newRecipe);
     }
 
-    public Recipe updateRecipe(long userId, RecipeDTO updatedRecipe) {
-        Recipe recipe = recipes.get((int)userId);
+    public Recipe updateRecipe(Long id, RecipeDTO updatedRecipe) {
+        Recipe recipe = recipesRepository.findById(id).get();
         if(!recipe.getName().isEmpty())
             recipe.setName(updatedRecipe.getName());
         if(!recipe.getDescription().isEmpty())
             recipe.setDescription(updatedRecipe.getDescription());
-        return recipe;
+        return recipesRepository.save(recipe);
     }
 
-    public List<Recipe> getRecipes() {
-        return recipes;
+    public Iterable<Recipe> getRecipes() {
+        return recipesRepository.findAll();
     }
 
     public Recipe deleteRecipe(long id) {
-        if(existsRecipe(id)){
-            return recipes.remove((int)id);
+        Optional<Recipe> recipe = recipesRepository.findById(id);
+        Recipe recipeValue = null;
+        if(recipe.isPresent()) {
+            recipesRepository.delete(recipe.get());
+            recipeValue = recipe.get();
         }
-        return null;
-    }
-
-    private boolean existsRecipe(long id) {
-        return id >= 0 && id < recipes.size();
+        return recipeValue;
     }
 
     public Recipe getRecipeById(long id) {
-        if(existsRecipe(id)){
-            return recipes.get((int)id);
+        Optional<Recipe> recipe = recipesRepository.findById(id);
+        Recipe recipeValue = null;
+        if(recipe.isPresent()) {
+            recipeValue = recipe.get();
         }
-        return null;
+        return recipeValue;
     }
 }

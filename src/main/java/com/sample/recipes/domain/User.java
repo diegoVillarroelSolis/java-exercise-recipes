@@ -1,9 +1,17 @@
 package com.sample.recipes.domain;
 
+import org.springframework.data.annotation.Id;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
+@Entity
 public class User {
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
     @NotNull
     private String name;

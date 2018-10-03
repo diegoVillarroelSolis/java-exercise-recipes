@@ -31,9 +31,9 @@ public class RecipesController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<Recipe>> getRecipes() {
+    public ResponseEntity<Iterable<Recipe>> getRecipes() {
         try {
-            List<Recipe> recipes = recipesService.getRecipes();
+            Iterable<Recipe> recipes = recipesService.getRecipes();
             return new ResponseEntity<>(recipes, HttpStatus.ACCEPTED);
         }
         catch (RestClientException ex) {

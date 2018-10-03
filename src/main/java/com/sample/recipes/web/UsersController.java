@@ -35,9 +35,9 @@ public class UsersController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<User>> getUsers() {
+    public ResponseEntity<Iterable<User>> getUsers() {
         try {
-            List<User> users = usersService.getUsers();
+            Iterable<User> users = usersService.getUsers();
             return new ResponseEntity<>(users, HttpStatus.ACCEPTED);
         }
         catch (RestClientException ex) {
