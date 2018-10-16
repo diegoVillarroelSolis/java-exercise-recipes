@@ -25,7 +25,7 @@ public class UsersController {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody UserDTO user) {
         UserDTO newUser = usersService.addUser(user);
-        return new ResponseEntity<>(newUser, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
