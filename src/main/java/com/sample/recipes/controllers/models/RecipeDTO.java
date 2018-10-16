@@ -1,10 +1,17 @@
-package com.sample.recipes.domain.dto;
+package com.sample.recipes.controllers.models;
 
 import javax.validation.constraints.NotNull;
 
 public class RecipeDTO {
+
     private String name;
     private String description;
+
+    public RecipeDTO(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
     @NotNull
     private long userId;
 

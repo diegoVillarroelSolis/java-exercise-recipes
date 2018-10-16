@@ -1,6 +1,8 @@
-package com.sample.recipes.domain;
+package com.sample.recipes.persistence.entities;
 
 
+
+import com.sample.recipes.persistence.entities.User;
 
 import javax.persistence.*;
 

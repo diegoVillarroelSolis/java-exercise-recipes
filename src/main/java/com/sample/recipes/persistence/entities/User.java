@@ -1,4 +1,4 @@
-package com.sample.recipes.domain;
+package com.sample.recipes.persistence.entities;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

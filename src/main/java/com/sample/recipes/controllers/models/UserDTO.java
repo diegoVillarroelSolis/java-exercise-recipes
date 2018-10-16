@@ -1,4 +1,4 @@
-package com.sample.recipes.domain.dto;
+package com.sample.recipes.controllers.models;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -12,6 +12,13 @@ public class UserDTO {
     private String email;
     @NotNull
     private String password;
+
+    public UserDTO(@NotNull String name, @NotNull Date dateOfBirth, @NotNull String email, @NotNull String password) {
+        this.name = name;
+        this.dateOfBirth = dateOfBirth;
+        this.email = email;
+        this.password = password;
+    }
 
     public String getName() {
         return name;
