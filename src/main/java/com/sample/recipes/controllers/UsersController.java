@@ -1,8 +1,6 @@
-package com.sample.recipes.web;
+package com.sample.recipes.controllers;
 
-import com.sample.recipes.domain.Recipe;
 import com.sample.recipes.domain.User;
-import com.sample.recipes.domain.dto.RecipeDTO;
 import com.sample.recipes.domain.dto.UserDTO;
 import com.sample.recipes.services.RecipesService;
 import com.sample.recipes.services.UsersService;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "users")
@@ -38,7 +35,7 @@ public class UsersController {
     public ResponseEntity<Iterable<User>> getUsers() {
         try {
             Iterable<User> users = usersService.getUsers();
-            return new ResponseEntity<>(users, HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(users, HttpStatus.OK);
         }
         catch (RestClientException ex) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

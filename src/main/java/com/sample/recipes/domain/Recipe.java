@@ -1,10 +1,8 @@
 package com.sample.recipes.domain;
 
-import org.springframework.data.annotation.Id;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+
+import javax.persistence.*;
 
 @Entity
 public class Recipe {
@@ -13,6 +11,7 @@ public class Recipe {
     private long id;
     private String name;
     private String description;
+    @OneToOne
     private User user;
 
     public User getUser() {

@@ -1,8 +1,7 @@
-package com.sample.recipes.web;
+package com.sample.recipes.controllers;
 
 import com.sample.recipes.domain.Recipe;
 import com.sample.recipes.domain.dto.RecipeDTO;
-import com.sample.recipes.services.RecipesService;
 import com.sample.recipes.services.RecipesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "recipes")
