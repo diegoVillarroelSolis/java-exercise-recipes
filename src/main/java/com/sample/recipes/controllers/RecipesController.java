@@ -33,6 +33,7 @@ public class RecipesController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @ResponseBody
     public ResponseEntity<RecipeDTO> getRecipe(@PathVariable long id) throws NotFoundException {
         RecipeDTO recipe = recipesService.getRecipeById(id);
         return new ResponseEntity<>(recipe, HttpStatus.OK);

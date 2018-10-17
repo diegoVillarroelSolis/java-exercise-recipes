@@ -1,19 +1,29 @@
 package com.sample.recipes.controllers.models;
 
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 public class RecipeDTO {
 
+    @NotNull
     private String name;
+    @NotNull
     private String description;
+    @NotNull
+    private long userId;
 
     public RecipeDTO(String name, String description) {
         this.name = name;
         this.description = description;
     }
 
-    @NotNull
-    private long userId;
+    public RecipeDTO(String name, String description, long userId) {
+        this.name = name;
+        this.description = description;
+        this.userId = userId;
+    }
+
+    public RecipeDTO() {}
 
     public long getUserId() {
         return userId;
@@ -37,5 +47,21 @@ public class RecipeDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RecipeDTO recipeDTO = (RecipeDTO) o;
+        return userId == recipeDTO.userId &&
+                Objects.equals(name, recipeDTO.name) &&
+                Objects.equals(description, recipeDTO.description);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(name, description, userId);
     }
 }

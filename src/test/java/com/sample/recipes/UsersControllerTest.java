@@ -2,15 +2,18 @@ package com.sample.recipes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sample.recipes.controllers.models.UserDTO;
+import com.sample.recipes.exception.NotFoundException;
 import com.sample.recipes.persistence.entities.User;
 import com.sample.recipes.services.RecipesService;
 import com.sample.recipes.services.UsersService;
 import com.sample.recipes.controllers.UsersController;
 import org.junit.Assert;
 
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -47,11 +50,13 @@ public class UsersControllerTest {
 
     @Before
     public void settingUp() {
+
         mapper = new ObjectMapper();
     }
 
     @Test
     public void whenGetUsers() throws Exception {
+
         List<UserDTO> users = Arrays.asList(
                 new UserDTO("Juan", new Date(), "juan@email.com", "password"),
                 new UserDTO("Jose", new Date(), "jose@email.com", "password")
@@ -77,7 +82,9 @@ public class UsersControllerTest {
 
     @Test
     public void whenRegisterUser() throws Exception {
+
         UserDTO user = new UserDTO("Juan", new Date(), "juan@email.com", "password");
+
         when(usersService.addUser(user)).thenReturn(user);
 
         String userJson = mapper.writeValueAsString(user);
@@ -94,5 +101,82 @@ public class UsersControllerTest {
                 .getContentAsString(), UserDTO.class);
 
         Assert.assertEquals(user, userResult);
+    }
+
+    @Test
+    public void whenRegisterUserWithInvalidEmptyData() throws Exception {
+
+        UserDTO user = new UserDTO();
+
+        when(usersService.addUser(user)).thenReturn(null);
+
+        String userJson = mapper.writeValueAsString(user);
+
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userJson)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void whenUpdateUser() throws Exception {
+
+        long userId = 0;
+        UserDTO updatedUser = new UserDTO("Jose", new Date(), "jose@email.com", "newPassword");
+
+        when(usersService.updateUser(userId, updatedUser)).thenReturn(updatedUser);
+
+        String userUpdatedJson = mapper.writeValueAsString(updatedUser);
+
+        ResultActions resultActions = mockMvc.perform(put(String.format("/users/%d", userId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userUpdatedJson)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andExpect(status().isOk());
+
+        UserDTO userUpdatedResult = mapper.readValue(resultActions.andReturn()
+                .getResponse()
+                .getContentAsString(), UserDTO.class);
+
+        Assert.assertEquals(updatedUser, userUpdatedResult);
+    }
+
+    @Test
+    public void whenUpdateUserWithInvalidEmptyData() throws Exception {
+
+        long userId = 0;
+        UserDTO updatedUser = new UserDTO();
+
+        when(usersService.updateUser(userId, updatedUser)).thenReturn(null);
+
+        String userUpdatedJson = mapper.writeValueAsString(updatedUser);
+
+        mockMvc.perform(put(String.format("/users/%d", userId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userUpdatedJson)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void whenUpdateUserWithInvalidId() throws Exception {
+
+        long userId = -1;
+        UserDTO updatedUser = new UserDTO();
+
+        when(usersService.updateUser(userId, updatedUser)).thenThrow(NotFoundException.class);
+
+        String userUpdatedJson = mapper.writeValueAsString(updatedUser);
+
+        mockMvc.perform(put(String.format("/users/%d", userId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userUpdatedJson)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andExpect(status().isNotFound());
     }
 }

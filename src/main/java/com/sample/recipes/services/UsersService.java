@@ -38,23 +38,15 @@ public class UsersService {
     }
 
     public UserDTO updateUser(long id, UserDTO updatedUser) throws NotFoundException {
-        Optional<User> user = usersRepository.findById(id);
-        User userValue;
+        User user = getUserById(id);
 
-        if (user.isPresent()) {
-            userValue = user.get();
-        }
-        else {
-            throw new NotFoundException();
-        }
+        user.setDateOfBirth(updatedUser.getDateOfBirth());
+        user.setEmail(updatedUser.getEmail());
+        user.setName(updatedUser.getName());
+        user.setPassword(updatedUser.getPassword());
+        usersRepository.save(user);
 
-        userValue.setDateOfBirth(updatedUser.getDateOfBirth());
-        userValue.setEmail(updatedUser.getEmail());
-        userValue.setName(updatedUser.getName());
-        userValue.setPassword(updatedUser.getPassword());
-        usersRepository.save(userValue);
-
-        return new UserDTO(userValue.getName(), userValue.getDateOfBirth(), userValue.getEmail(), userValue.getPassword());
+        return new UserDTO(user.getName(), user.getDateOfBirth(), user.getEmail(), user.getPassword());
     }
 
     public User getUserById(long userId) throws NotFoundException {

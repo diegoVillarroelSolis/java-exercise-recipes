@@ -35,7 +35,7 @@ public class UsersController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<UserDTO> updateUser(@PathVariable long id, @RequestBody UserDTO user) throws NotFoundException {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable long id, @Valid @RequestBody UserDTO user) throws NotFoundException {
         UserDTO updatedUser = usersService.updateUser(id, user);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
