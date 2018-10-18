@@ -5,18 +5,20 @@ import com.sample.recipes.exception.NotFoundException;
 import com.sample.recipes.persistence.UsersRepository;
 import com.sample.recipes.persistence.entities.User;
 import com.sample.recipes.services.UsersService;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -33,6 +35,16 @@ public class UsersServiceTest {
 
         when(usersRepository.save(user)).thenReturn(user);
         Assert.assertEquals(usersService.addUser(newUser), newUser);
+    }
+
+    @Test
+    public void whenAddUserWithEmptyData() {
+        User expectedUser = new User("Jose", new Date(), "jose@email.com", "password");
+        UserDTO newEmptyUser = new UserDTO();
+
+        when(usersRepository.save(expectedUser)).thenReturn(expectedUser);
+
+        assertEquals(usersService.addUser(newEmptyUser), null);
     }
 
     @Test
@@ -60,6 +72,41 @@ public class UsersServiceTest {
         long userId = 0;
 
         when(usersRepository.save(user)).thenReturn(user);
+        when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
+
         Assert.assertEquals(usersService.updateUser(userId, updatedUser), updatedUser);
+    }
+
+    @Test
+    public void whenUpdateUserWithEmptyData() throws NotFoundException {
+        UserDTO updatedEmptyUser = new UserDTO();
+        User user = new User("Juan", new Date(), "juan@email.com", "password");
+
+        UserDTO updatedUser = new UserDTO("Juan", new Date(), "juan@email.com", "password");
+        long userId = 0;
+
+        when(usersRepository.save(user)).thenReturn(user);
+        when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        Assert.assertEquals(usersService.updateUser(userId, updatedEmptyUser), null);
+    }
+
+    @Test
+    public void whenGetUserById() throws NotFoundException {
+        User user = new User("Juan", new Date(), "juan@email.com", "password");
+        long userId = 0;
+
+        when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        Assert.assertEquals(usersService.getUserById(userId), user);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void whenGetUserByIdWithInvalidId() throws NotFoundException {
+        long userId = -1;
+
+        when(usersRepository.findById(userId)).thenReturn(Optional.empty());
+
+        Assert.assertEquals(usersService.getUserById(userId), null);
     }
 }

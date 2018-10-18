@@ -24,9 +24,9 @@ public class RecipesService {
         Recipe newRecipe = new Recipe();
         User user = usersService.getUserById(recipe.getUserId());
 
-        if(!recipe.getName().isEmpty())
+        if(recipe.getName() != null)
             newRecipe.setName(recipe.getName());
-        if(!recipe.getDescription().isEmpty())
+        if(recipe.getDescription() != null)
             newRecipe.setDescription(recipe.getDescription());
 
         newRecipe.setUser(user);
@@ -44,9 +44,9 @@ public class RecipesService {
         else {
             throw new NotFoundException();
         }
-        if(!updatedRecipe.getName().isEmpty())
+        if(updatedRecipe.getName() != null)
             recipeValue.setName(updatedRecipe.getName());
-        if(!updatedRecipe.getDescription().isEmpty())
+        if(updatedRecipe.getDescription() != null)
             recipeValue.setDescription(updatedRecipe.getDescription());
 
         recipesRepository.save(recipeValue);

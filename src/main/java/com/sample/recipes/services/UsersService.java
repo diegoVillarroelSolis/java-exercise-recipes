@@ -20,14 +20,18 @@ public class UsersService {
     public UserDTO addUser(@Valid UserDTO user) {
         User newUser = new User();
 
-        newUser.setDateOfBirth(user.getDateOfBirth());
-        newUser.setEmail(user.getEmail());
-        newUser.setName(user.getName());
-        newUser.setPassword(user.getPassword());
+        if( user.getName() != null || user.getDateOfBirth() != null || user.getEmail()!= null || user.getPassword()!= null ) {
+            newUser.setDateOfBirth(user.getDateOfBirth());
+            newUser.setEmail(user.getEmail());
+            newUser.setName(user.getName());
+            newUser.setPassword(user.getPassword());
+            usersRepository.save(newUser);
+        }
+        else {
+            user = null;
+        }
 
-        usersRepository.save(newUser);
-
-        return new UserDTO(newUser.getName(), newUser.getDateOfBirth(), newUser.getEmail(), newUser.getPassword());
+        return user;
     }
 
     public List<UserDTO> getUsers() {
@@ -38,15 +42,28 @@ public class UsersService {
     }
 
     public UserDTO updateUser(long id, UserDTO updatedUser) throws NotFoundException {
-        User user = getUserById(id);
+        Optional<User> user = usersRepository.findById(id);
+        User foundUser;
 
-        user.setDateOfBirth(updatedUser.getDateOfBirth());
-        user.setEmail(updatedUser.getEmail());
-        user.setName(updatedUser.getName());
-        user.setPassword(updatedUser.getPassword());
-        usersRepository.save(user);
+        if(user.isPresent()) {
+            foundUser = user.get();
+        }
+        else {
+            throw new NotFoundException();
+        }
 
-        return new UserDTO(user.getName(), user.getDateOfBirth(), user.getEmail(), user.getPassword());
+        if( updatedUser.getName() != null || updatedUser.getDateOfBirth() != null || updatedUser.getEmail()!= null || updatedUser.getPassword()!= null ) {
+            foundUser.setDateOfBirth(updatedUser.getDateOfBirth());
+            foundUser.setEmail(updatedUser.getEmail());
+            foundUser.setName(updatedUser.getName());
+            foundUser.setPassword(updatedUser.getPassword());
+            usersRepository.save(foundUser);
+        }
+        else {
+            updatedUser = null;
+        }
+
+        return updatedUser;
     }
 
     public User getUserById(long userId) throws NotFoundException {

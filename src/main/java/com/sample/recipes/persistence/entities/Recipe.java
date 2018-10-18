@@ -16,6 +16,14 @@ public class Recipe {
     @OneToOne
     private User user;
 
+    public Recipe(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
+    public Recipe() {
+    }
+
     public User getUser() {
         return user;
     }

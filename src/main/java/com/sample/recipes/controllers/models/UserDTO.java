@@ -71,4 +71,9 @@ public class UserDTO {
 
         return Objects.hash(name, dateOfBirth, email, password);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s $s $s", name, email, password);
+    }
 }
