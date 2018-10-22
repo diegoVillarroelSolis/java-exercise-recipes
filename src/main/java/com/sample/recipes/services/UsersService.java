@@ -4,13 +4,18 @@ import com.sample.recipes.exception.NotFoundException;
 import com.sample.recipes.persistence.entities.User;
 import com.sample.recipes.controllers.models.UserDTO;
 import com.sample.recipes.persistence.UsersRepository;
+import com.sample.recipes.utils.MapperHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class UsersService {
@@ -18,32 +23,28 @@ public class UsersService {
     private UsersRepository usersRepository;
 
     public UserDTO addUser(@Valid UserDTO user) {
-        User newUser = new User();
+        User savedUser;
+        UserDTO responseUser = null;
 
-        if( user.getName() != null || user.getDateOfBirth() != null || user.getEmail()!= null || user.getPassword()!= null ) {
-            newUser.setDateOfBirth(user.getDateOfBirth());
-            newUser.setEmail(user.getEmail());
-            newUser.setName(user.getName());
-            newUser.setPassword(user.getPassword());
-            usersRepository.save(newUser);
-        }
-        else {
-            user = null;
+        if( checkUserParameters(user) ) {
+            User newUserEntity = MapperHelper.USER_MAPPER.convertToUserEntity(user);
+            savedUser = usersRepository.save(newUserEntity);
+            responseUser = MapperHelper.USER_MAPPER.convertToUserDto(savedUser);
         }
 
-        return user;
+        return responseUser;
     }
 
     public List<UserDTO> getUsers() {
-        Iterable<User> users = usersRepository.findAll();
-        List<UserDTO> foundUsers = new ArrayList<>();
-        users.forEach(u -> foundUsers.add(new UserDTO(u.getName(), u.getDateOfBirth(), u.getEmail(), u.getPassword())));
-        return foundUsers;
+        return StreamSupport.stream(usersRepository.findAll().spliterator(), false)
+                .map(MapperHelper.USER_MAPPER::convertToUserDto)
+                .collect(Collectors.toList());
     }
 
     public UserDTO updateUser(long id, UserDTO updatedUser) throws NotFoundException {
         Optional<User> user = usersRepository.findById(id);
         User foundUser;
+        UserDTO responseUser = null;
 
         if(user.isPresent()) {
             foundUser = user.get();
@@ -52,21 +53,33 @@ public class UsersService {
             throw new NotFoundException();
         }
 
-        if( updatedUser.getName() != null || updatedUser.getDateOfBirth() != null || updatedUser.getEmail()!= null || updatedUser.getPassword()!= null ) {
+        if( checkUserParameters(updatedUser) ) {
             foundUser.setDateOfBirth(updatedUser.getDateOfBirth());
             foundUser.setEmail(updatedUser.getEmail());
             foundUser.setName(updatedUser.getName());
             foundUser.setPassword(updatedUser.getPassword());
+
             usersRepository.save(foundUser);
-        }
-        else {
-            updatedUser = null;
+            responseUser = MapperHelper.USER_MAPPER.convertToUserDto(foundUser);
         }
 
-        return updatedUser;
+        return responseUser;
     }
 
-    public User getUserById(long userId) throws NotFoundException {
+    public UserDTO getUserById(long userId) throws NotFoundException {
+        Optional<User> user = usersRepository.findById(userId);
+        User foundUser;
+
+        if(user.isPresent()) {
+            foundUser = user.get();
+        }
+        else {
+            throw new NotFoundException();
+        }
+        return MapperHelper.USER_MAPPER.convertToUserDto(foundUser);
+    }
+
+    public User finUserById(long userId) throws NotFoundException {
         Optional<User> user = usersRepository.findById(userId);
         User foundUser;
 
@@ -77,5 +90,16 @@ public class UsersService {
             throw new NotFoundException();
         }
         return foundUser;
+    }
+
+    private boolean checkStringValue (String s) {
+        return s != null && !s.isEmpty();
+    }
+
+    private boolean checkUserParameters(UserDTO user) {
+        return checkStringValue(user.getName())
+                && user.getDateOfBirth() != null
+                && checkStringValue(user.getEmail())
+                && checkStringValue(user.getPassword());
     }
 }

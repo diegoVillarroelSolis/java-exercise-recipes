@@ -5,7 +5,6 @@ import com.sample.recipes.exception.NotFoundException;
 import com.sample.recipes.persistence.UsersRepository;
 import com.sample.recipes.persistence.entities.User;
 import com.sample.recipes.services.UsersService;
-import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

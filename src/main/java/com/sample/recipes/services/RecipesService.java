@@ -1,10 +1,12 @@
 package com.sample.recipes.services;
 
+import com.sample.recipes.controllers.models.UserDTO;
 import com.sample.recipes.exception.NotFoundException;
 import com.sample.recipes.persistence.entities.Recipe;
-import com.sample.recipes.persistence.entities.User;
 import com.sample.recipes.controllers.models.RecipeDTO;
 import com.sample.recipes.persistence.RecipesRepository;
+import com.sample.recipes.persistence.entities.User;
+import com.sample.recipes.utils.MapperHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,8 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class RecipesService {
@@ -21,22 +25,27 @@ public class RecipesService {
     private RecipesRepository recipesRepository;
 
     public RecipeDTO addRecipe(@Valid RecipeDTO recipe) throws NotFoundException {
-        Recipe newRecipe = new Recipe();
-        User user = usersService.getUserById(recipe.getUserId());
+        Recipe newRecipe;
+        Recipe savedRecipe;
+        RecipeDTO responseRecipe = null;
+        User user = usersService.finUserById(recipe.getUserId());
+        System.out.println(user);
 
-        if(recipe.getName() != null)
-            newRecipe.setName(recipe.getName());
-        if(recipe.getDescription() != null)
-            newRecipe.setDescription(recipe.getDescription());
-
-        newRecipe.setUser(user);
-        recipesRepository.save(newRecipe);
-        return recipe;
+        if(checkRecipeParameters(recipe)) {
+            newRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeEntity(recipe);
+            newRecipe.setUser(user);
+            savedRecipe = recipesRepository.save(newRecipe);
+            responseRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(savedRecipe);
+        }
+        return responseRecipe;
     }
 
     public RecipeDTO updateRecipe(Long id, RecipeDTO updatedRecipe) throws NotFoundException {
+
+        usersService.finUserById(updatedRecipe.getUserId());
         Optional<Recipe> recipe = recipesRepository.findById(id);
         Recipe recipeValue;
+        RecipeDTO responseRecipe = null;
 
         if(recipe.isPresent()) {
             recipeValue = recipe.get();
@@ -44,21 +53,21 @@ public class RecipesService {
         else {
             throw new NotFoundException();
         }
-        if(updatedRecipe.getName() != null)
+
+        if( checkRecipeParameters(updatedRecipe) ) {
             recipeValue.setName(updatedRecipe.getName());
-        if(updatedRecipe.getDescription() != null)
             recipeValue.setDescription(updatedRecipe.getDescription());
+            recipesRepository.save(recipeValue);
+            responseRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(recipeValue);
+        }
 
-        recipesRepository.save(recipeValue);
-
-        return new RecipeDTO(recipeValue.getName(), recipeValue.getDescription());
+        return responseRecipe;
     }
 
     public List<RecipeDTO> getRecipes() {
-        Iterable<Recipe> recipes = recipesRepository.findAll();
-        List<RecipeDTO> foundRecipes = new ArrayList<>();
-        recipes.forEach(r -> foundRecipes.add(new RecipeDTO(r.getName(), r.getDescription())));
-        return foundRecipes;
+        return StreamSupport.stream(recipesRepository.findAll().spliterator(), false)
+                .map(MapperHelper.RECIPE_MAPPER::convertToRecipeDto)
+                .collect(Collectors.toList());
     }
 
     public RecipeDTO deleteRecipe(long id) throws NotFoundException {
@@ -66,7 +75,7 @@ public class RecipesService {
         RecipeDTO deletedRecipe;
         if(recipe.isPresent()) {
             recipesRepository.delete(recipe.get());
-            deletedRecipe = new RecipeDTO(recipe.get().getName(), recipe.get().getDescription());
+            deletedRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(recipe.get());
         }
         else {
             throw new NotFoundException();
@@ -76,13 +85,22 @@ public class RecipesService {
 
     public RecipeDTO getRecipeById(long id) throws NotFoundException {
         Optional<Recipe> recipe = recipesRepository.findById(id);
-        RecipeDTO foundRecipe;
+        Recipe foundRecipe;
         if(recipe.isPresent()) {
-            foundRecipe = new RecipeDTO(recipe.get().getName(), recipe.get().getDescription());
+            foundRecipe = recipe.get();
         }
         else {
             throw new NotFoundException();
         }
-        return foundRecipe;
+        return MapperHelper.RECIPE_MAPPER.convertToRecipeDto(foundRecipe);
+    }
+
+    private boolean checkStringValue (String s) {
+        return s != null && !s.isEmpty();
+    }
+
+    private boolean checkRecipeParameters(RecipeDTO recipe) {
+        return checkStringValue(recipe.getName())
+                && checkStringValue(recipe.getDescription());
     }
 }

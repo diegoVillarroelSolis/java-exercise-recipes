@@ -12,6 +12,16 @@ public class RecipeDTO {
     @NotNull
     private long userId;
 
+    private UserDTO user;
+
+    public UserDTO getUser() {
+        return user;
+    }
+
+    public void setUser(UserDTO user) {
+        this.user = user;
+    }
+
     public RecipeDTO(String name, String description) {
         this.name = name;
         this.description = description;
