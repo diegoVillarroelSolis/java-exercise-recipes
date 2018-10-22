@@ -5,6 +5,7 @@ import com.sample.recipes.exception.NotFoundException;
 import com.sample.recipes.persistence.UsersRepository;
 import com.sample.recipes.persistence.entities.User;
 import com.sample.recipes.services.UsersService;
+import com.sample.recipes.utils.MapperHelper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +31,7 @@ public class UsersServiceTest {
     @Test
     public void whenAddUser() {
         User user = new User("Juan", new Date(), "juan@email.com", "password");
-        UserDTO newUser = new UserDTO("Juan", new Date(), "juan@email.com", "password");
+        UserDTO newUser = MapperHelper.USER_MAPPER.convertToUserDto(user);
 
         when(usersRepository.save(user)).thenReturn(user);
         Assert.assertEquals(usersService.addUser(newUser), newUser);
@@ -51,8 +52,8 @@ public class UsersServiceTest {
         User userJuan = new User("Juan", new Date(), "juan@email.com", "password");
         User userJose = new User("Jose", new Date(), "jose@email.com", "password1");
 
-        UserDTO newUserJuan = new UserDTO("Juan", new Date(), "juan@email.com", "password");
-        UserDTO newUserJose = new UserDTO("Jose", new Date(), "jose@email.com", "password1");
+        UserDTO newUserJuan = MapperHelper.USER_MAPPER.convertToUserDto(userJuan);
+        UserDTO newUserJose = MapperHelper.USER_MAPPER.convertToUserDto(userJose);
 
         List<User> users = Arrays.asList(userJuan, userJose);
 
@@ -67,7 +68,7 @@ public class UsersServiceTest {
     @Test
     public void whenUpdateUser() throws NotFoundException {
         User user = new User("Juan", new Date(), "juan@email.com", "password");
-        UserDTO updatedUser = new UserDTO("Juan", new Date(), "juan@email.com", "password");
+        UserDTO updatedUser = MapperHelper.USER_MAPPER.convertToUserDto(user);
         long userId = 0;
 
         when(usersRepository.save(user)).thenReturn(user);
@@ -80,8 +81,6 @@ public class UsersServiceTest {
     public void whenUpdateUserWithEmptyData() throws NotFoundException {
         UserDTO updatedEmptyUser = new UserDTO();
         User user = new User("Juan", new Date(), "juan@email.com", "password");
-
-        UserDTO updatedUser = new UserDTO("Juan", new Date(), "juan@email.com", "password");
         long userId = 0;
 
         when(usersRepository.save(user)).thenReturn(user);
@@ -97,7 +96,7 @@ public class UsersServiceTest {
 
         when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        Assert.assertEquals(usersService.getUserById(userId), user);
+        Assert.assertEquals(usersService.finUserById(userId), user);
     }
 
     @Test(expected = NotFoundException.class)

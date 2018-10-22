@@ -195,7 +195,7 @@ public class RecipesControllerTest {
 
         String recipeUpdatedJson = mapper.writeValueAsString(updatedRecipe);
 
-        ResultActions resultActions = mockMvc.perform(put(String.format("/recipes/%d", recipeId))
+        mockMvc.perform(put(String.format("/recipes/%d", recipeId))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(recipeUpdatedJson)
                 .accept(MediaType.APPLICATION_JSON)

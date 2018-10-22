@@ -74,4 +74,9 @@ public class RecipeDTO {
 
         return Objects.hash(name, description, userId);
     }
+
+    @Override
+    public String toString() {
+        return name + " " + description;
+    }
 }
