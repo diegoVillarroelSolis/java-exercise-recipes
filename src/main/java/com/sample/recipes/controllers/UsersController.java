@@ -39,4 +39,9 @@ public class UsersController {
         UserDTO updatedUser = usersService.updateUser(id, user);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
+
+    @PostMapping("/signin")
+    public String login(@RequestParam String email, @RequestParam String password) {
+        return usersService.signin(email, password);
+    }
 }
