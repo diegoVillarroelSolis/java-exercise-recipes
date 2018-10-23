@@ -6,6 +6,10 @@ import com.sample.recipes.controllers.models.UserDTO;
 import com.sample.recipes.persistence.UsersRepository;
 import com.sample.recipes.utils.MapperHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +21,14 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.Collections.emptyList;
+
 @Service
-public class UsersService {
+public class UsersService implements UserDetailsService {
     @Autowired
     private UsersRepository usersRepository;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public UserDTO addUser(@Valid UserDTO user) {
         User savedUser;
@@ -28,6 +36,7 @@ public class UsersService {
 
         if( checkUserParameters(user) ) {
             User newUserEntity = MapperHelper.USER_MAPPER.convertToUserEntity(user);
+            newUserEntity.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             savedUser = usersRepository.save(newUserEntity);
             responseUser = MapperHelper.USER_MAPPER.convertToUserDto(savedUser);
         }
@@ -101,5 +110,14 @@ public class UsersService {
                 && user.getDateOfBirth() != null
                 && checkStringValue(user.getEmail())
                 && checkStringValue(user.getPassword());
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User applicationUser = usersRepository.findByEmail(email);
+        if (applicationUser == null) {
+            throw new UsernameNotFoundException(email);
+        }
+        return new org.springframework.security.core.userdetails.User(applicationUser.getEmail(), applicationUser.getPassword(), emptyList());
     }
 }
