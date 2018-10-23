@@ -162,11 +162,10 @@ public class UsersControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test(expected = NotFoundException.class)
     public void whenUpdateUserWithInvalidId() throws Exception {
 
         long userId = -1;
-        UserDTO updatedUser = new UserDTO();
+        UserDTO updatedUser = new UserDTO("Jose", new Date(), "jose@email.com", "newPassword");
 
         when(usersService.updateUser(userId, updatedUser)).thenThrow(NotFoundException.class);
 

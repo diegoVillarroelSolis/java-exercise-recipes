@@ -26,16 +26,14 @@ public class RecipesService {
 
     public RecipeDTO addRecipe(@Valid RecipeDTO recipe) throws NotFoundException {
         Recipe newRecipe;
-        Recipe savedRecipe;
         RecipeDTO responseRecipe = null;
         User user = usersService.finUserById(recipe.getUserId());
-        System.out.println(user);
 
         if(checkRecipeParameters(recipe)) {
             newRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeEntity(recipe);
             newRecipe.setUser(user);
-            savedRecipe = recipesRepository.save(newRecipe);
-            responseRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(savedRecipe);
+            recipesRepository.save(newRecipe);
+            responseRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(newRecipe);
         }
         return responseRecipe;
     }
@@ -60,6 +58,8 @@ public class RecipesService {
             recipesRepository.save(recipeValue);
             responseRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(recipeValue);
         }
+
+
 
         return responseRecipe;
     }

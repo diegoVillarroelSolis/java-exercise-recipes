@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class RecipesServiceTest {
     @Mock
     private RecipesRepository recipesRepository;
@@ -39,6 +39,9 @@ public class RecipesServiceTest {
 
         when(usersService.finUserById(user.getId())).thenReturn(user);
         when(recipesRepository.save(recipe)).thenReturn(recipe);
+
+        System.out.println("Recipe1 "+ newRecipe);
+        System.out.println("Recipe2 " + recipesService.addRecipe(newRecipe));
 
         assertEquals(recipesService.addRecipe(newRecipe), newRecipe);
     }
@@ -93,20 +96,15 @@ public class RecipesServiceTest {
 
     @Test
     public void whenUpdateRecipeWithEmptyData() throws NotFoundException {
-        Recipe expectedRecipe = new Recipe("Recipe", "Description");
         RecipeDTO updatedEmptyRecipe = new RecipeDTO();
-        User user = new User("Juan", new Date(), "juan@email.com", "password");
-        expectedRecipe.setUser(user);
-
-        Recipe recipe = new Recipe("Recipe", "Description");
-        recipe.setUser(user);
-        RecipeDTO updatedRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(recipe);
+        RecipeDTO toUpdateRecipe = new RecipeDTO("Recipe", "Description");
+        Recipe recipe = MapperHelper.RECIPE_MAPPER.convertToRecipeEntity(toUpdateRecipe);
         long recipeId = 0;
 
-        when(recipesRepository.save(recipe)).thenReturn(recipe);
+        when(recipesRepository.save(recipe)).thenReturn(null);
         when(recipesRepository.findById(recipeId)).thenReturn(Optional.of(recipe));
 
-        assertEquals(recipesService.updateRecipe(recipeId, updatedEmptyRecipe), updatedRecipe);
+        assertEquals(recipesService.updateRecipe(recipeId, updatedEmptyRecipe), null);
     }
 
     @Test
