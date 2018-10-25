@@ -11,9 +11,8 @@ import org.junit.Assert;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,6 +77,18 @@ public class UsersControllerTest {
 
             Assert.assertEquals(userExpected, userResult);
         }
+    }
+
+    @Test
+    public void whenGetUsersAndNoContent() throws Exception {
+
+        List<UserDTO> users = Arrays.asList();
+
+        when(usersService.getUsers()).thenReturn(users);
+
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8));
     }
 
     @Test
@@ -174,6 +185,48 @@ public class UsersControllerTest {
         mockMvc.perform(put(String.format("/users/%d", userId))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(userUpdatedJson)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void whenDeleteUser() throws Exception {
+
+        long userId = 0;
+        UserDTO deletedUser = new UserDTO("Juan", new Date(), "juan@email.com", "password");
+
+        when(usersService.deleteUser(userId)).thenReturn(deletedUser);
+
+        String userDeletedJson = mapper.writeValueAsString(deletedUser);
+
+        ResultActions resultActions = mockMvc.perform(delete(String.format("/users/%d", userId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userDeletedJson)
+                .accept(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
+                .andExpect(status().isOk());
+
+        UserDTO userDeletedResult = mapper.readValue(resultActions.andReturn()
+                .getResponse()
+                .getContentAsString(), UserDTO.class);
+
+        Assert.assertEquals(deletedUser, userDeletedResult);
+    }
+
+    @Test
+    public void whenDeleteUserWithInvalidId() throws Exception {
+
+        long userId = -1;
+        UserDTO deletedUser = new UserDTO("Juan", new Date(), "juan@email.com", "password");
+
+        when(usersService.deleteUser(userId)).thenThrow(NotFoundException.class);
+
+        String userDeletedJson = mapper.writeValueAsString(deletedUser);
+
+        mockMvc.perform(delete(String.format("/users/%d", userId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(userDeletedJson)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding("utf-8"))
                 .andExpect(status().isNotFound());

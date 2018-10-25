@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -96,7 +97,7 @@ public class UsersServiceTest {
 
         when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        Assert.assertEquals(usersService.finUserById(userId), user);
+        Assert.assertEquals(usersService.findUserById(userId), user);
     }
 
     @Test(expected = NotFoundException.class)
@@ -106,5 +107,31 @@ public class UsersServiceTest {
         when(usersRepository.findById(userId)).thenReturn(Optional.empty());
 
         Assert.assertEquals(usersService.getUserById(userId), null);
+    }
+
+    @Test
+    public void whenDeleteRecipe() throws NotFoundException {
+        long userId = 0;
+        User user = new User("Juan", new Date(), "juan@email.com", "password");
+        //User user = new User("User", "Description");
+
+        UserDTO deletedUser = MapperHelper.USER_MAPPER.convertToUserDto(user);
+
+        when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
+        doNothing().when(usersRepository).delete(user);
+
+        assertEquals(usersService.deleteUser(userId), deletedUser);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void whenDeleteUserWithInvalidId() throws NotFoundException {
+        long userId = -1;
+        User user = new User("Juan", new Date(), "juan@email.com", "password");
+
+        when(usersRepository.findById(userId)).thenReturn(Optional.empty());
+
+        doNothing().when(usersRepository).delete(user);
+
+        assertEquals(usersService.deleteUser(userId), null);
     }
 }

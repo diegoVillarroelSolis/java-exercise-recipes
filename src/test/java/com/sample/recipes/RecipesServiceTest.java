@@ -1,6 +1,8 @@
 package com.sample.recipes;
 
 import com.sample.recipes.controllers.models.RecipeDTO;
+import com.sample.recipes.controllers.models.RecipeUpdateDTO;
+import com.sample.recipes.exception.InvalidUserException;
 import com.sample.recipes.exception.NotFoundException;
 import com.sample.recipes.persistence.RecipesRepository;
 import com.sample.recipes.persistence.entities.Recipe;
@@ -17,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -30,14 +33,14 @@ public class RecipesServiceTest {
     private RecipesService recipesService;
 
     @Test
-    public void whenAddRecipe() throws NotFoundException {
+    public void whenAddRecipe() throws NotFoundException, InvalidUserException {
         Recipe recipe = new Recipe("Recipe1", "Description1");
         User user = new User("Juan", new Date(), "juan@email.com", "password");
         recipe.setUser(user);
 
         RecipeDTO newRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(recipe);
 
-        when(usersService.finUserById(user.getId())).thenReturn(user);
+        when(usersService.findUserById(user.getId())).thenReturn(user);
         when(recipesRepository.save(recipe)).thenReturn(recipe);
 
         System.out.println("Recipe1 "+ newRecipe);
@@ -47,16 +50,16 @@ public class RecipesServiceTest {
     }
 
     @Test
-    public void whenAddRecipeWithEmptyData() throws NotFoundException {
+    public void whenAddRecipeWithEmptyData() throws NotFoundException, InvalidUserException {
         Recipe expectedRecipe = new Recipe("Recipe1", "Description1");
         RecipeDTO newEmptyRecipe = new RecipeDTO();
         User user = new User("Juan", new Date(), "juan@email.com", "password");
         expectedRecipe.setUser(user);
 
-        when(usersService.finUserById(user.getId())).thenReturn(user);
+        when(usersService.findUserById(user.getId())).thenReturn(user);
         when(recipesRepository.save(expectedRecipe)).thenReturn(expectedRecipe);
 
-        assertEquals(recipesService.addRecipe(newEmptyRecipe), null);
+        assertNull(recipesService.addRecipe(newEmptyRecipe));
     }
 
     @Test
@@ -85,7 +88,7 @@ public class RecipesServiceTest {
         User user = new User("Juan", new Date(), "juan@email.com", "password");
         Recipe recipe = new Recipe("Recipe", "Description");
         recipe.setUser(user);
-        RecipeDTO updatedRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(recipe);
+        RecipeUpdateDTO updatedRecipe = new RecipeUpdateDTO("Recipe", "Description");
         long recipeId = 0;
 
         when(recipesRepository.save(recipe)).thenReturn(recipe);
@@ -96,7 +99,7 @@ public class RecipesServiceTest {
 
     @Test
     public void whenUpdateRecipeWithEmptyData() throws NotFoundException {
-        RecipeDTO updatedEmptyRecipe = new RecipeDTO();
+        RecipeUpdateDTO updatedEmptyRecipe = new RecipeUpdateDTO();
         RecipeDTO toUpdateRecipe = new RecipeDTO("Recipe", "Description");
         Recipe recipe = MapperHelper.RECIPE_MAPPER.convertToRecipeEntity(toUpdateRecipe);
         long recipeId = 0;

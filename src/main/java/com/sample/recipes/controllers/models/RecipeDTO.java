@@ -1,13 +1,16 @@
 package com.sample.recipes.controllers.models;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 public class RecipeDTO {
 
     @NotNull
+    @NotEmpty
     private String name;
     @NotNull
+    @NotEmpty
     private String description;
     @NotNull
     private long userId;

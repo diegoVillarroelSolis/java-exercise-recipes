@@ -1,7 +1,8 @@
 package com.sample.recipes.services;
 
-import com.sample.recipes.controllers.models.UserDTO;
+import com.sample.recipes.controllers.models.RecipeUpdateDTO;
 import com.sample.recipes.exception.NotFoundException;
+import com.sample.recipes.exception.InvalidUserException;
 import com.sample.recipes.persistence.entities.Recipe;
 import com.sample.recipes.controllers.models.RecipeDTO;
 import com.sample.recipes.persistence.RecipesRepository;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,15 +19,27 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class RecipesService {
+
+    private static final String USER_NOT_FOUND = "The user specified was not found.";
+    private static final String RECIPE_NOT_FOUND = "The recipe specified was not found.";
+
     @Autowired
     private UsersService usersService;
+
     @Autowired
     private RecipesRepository recipesRepository;
 
-    public RecipeDTO addRecipe(@Valid RecipeDTO recipe) throws NotFoundException {
+    public RecipeDTO addRecipe(@Valid RecipeDTO recipe) throws InvalidUserException {
+
         Recipe newRecipe;
         RecipeDTO responseRecipe = null;
-        User user = usersService.finUserById(recipe.getUserId());
+        User user;
+        try {
+            user = usersService.findUserById(recipe.getUserId());
+        }
+        catch (NotFoundException e) {
+            throw new InvalidUserException(USER_NOT_FOUND);
+        }
 
         if(checkRecipeParameters(recipe)) {
             newRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeEntity(recipe);
@@ -38,28 +50,25 @@ public class RecipesService {
         return responseRecipe;
     }
 
-    public RecipeDTO updateRecipe(Long id, RecipeDTO updatedRecipe) throws NotFoundException {
+    public RecipeUpdateDTO updateRecipe(Long id, RecipeUpdateDTO updatedRecipe) throws NotFoundException {
 
-        usersService.finUserById(updatedRecipe.getUserId());
         Optional<Recipe> recipe = recipesRepository.findById(id);
         Recipe recipeValue;
-        RecipeDTO responseRecipe = null;
+        RecipeUpdateDTO responseRecipe = null;
 
         if(recipe.isPresent()) {
             recipeValue = recipe.get();
         }
         else {
-            throw new NotFoundException();
+            throw new NotFoundException(RECIPE_NOT_FOUND);
         }
 
         if( checkRecipeParameters(updatedRecipe) ) {
             recipeValue.setName(updatedRecipe.getName());
             recipeValue.setDescription(updatedRecipe.getDescription());
             recipesRepository.save(recipeValue);
-            responseRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(recipeValue);
+            responseRecipe = updatedRecipe;
         }
-
-
 
         return responseRecipe;
     }
@@ -78,7 +87,7 @@ public class RecipesService {
             deletedRecipe = MapperHelper.RECIPE_MAPPER.convertToRecipeDto(recipe.get());
         }
         else {
-            throw new NotFoundException();
+            throw new NotFoundException(RECIPE_NOT_FOUND);
         }
         return deletedRecipe;
     }
@@ -90,13 +99,18 @@ public class RecipesService {
             foundRecipe = recipe.get();
         }
         else {
-            throw new NotFoundException();
+            throw new NotFoundException(RECIPE_NOT_FOUND);
         }
         return MapperHelper.RECIPE_MAPPER.convertToRecipeDto(foundRecipe);
     }
 
     private boolean checkStringValue (String s) {
         return s != null && !s.isEmpty();
+    }
+
+    private boolean checkRecipeParameters(RecipeUpdateDTO recipe) {
+        return checkStringValue(recipe.getName())
+                && checkStringValue(recipe.getDescription());
     }
 
     private boolean checkRecipeParameters(RecipeDTO recipe) {

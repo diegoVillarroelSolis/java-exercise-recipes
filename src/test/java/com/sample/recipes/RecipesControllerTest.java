@@ -3,8 +3,9 @@ package com.sample.recipes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sample.recipes.controllers.RecipesController;
 import com.sample.recipes.controllers.models.RecipeDTO;
+import com.sample.recipes.controllers.models.RecipeUpdateDTO;
+import com.sample.recipes.exception.InvalidUserException;
 import com.sample.recipes.exception.NotFoundException;
-import com.sample.recipes.persistence.entities.Recipe;
 import com.sample.recipes.services.RecipesService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
@@ -70,6 +70,18 @@ public class RecipesControllerTest {
 
             Assert.assertEquals(recipeExpected, recipeResult);
         }
+    }
+
+    @Test
+    public void whenGetRecipesAndNoContent() throws Exception {
+
+        List<RecipeDTO> recipes = Arrays.asList();
+
+        when(recipesService.getRecipes()).thenReturn(recipes);
+
+        mockMvc.perform(get("/recipes"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8));
     }
 
     @Test
@@ -149,7 +161,7 @@ public class RecipesControllerTest {
         long userId = -1;
         RecipeDTO recipe = new RecipeDTO("Recipe1", "Description1", userId);
 
-        when(recipesService.addRecipe(recipe)).thenThrow(NotFoundException.class);
+        when(recipesService.addRecipe(recipe)).thenThrow(InvalidUserException.class);
 
         String recipeJson = mapper.writeValueAsString(recipe);
 
@@ -158,14 +170,14 @@ public class RecipesControllerTest {
                 .content(recipeJson)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding("utf-8"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void whenUpdateRecipe() throws Exception { //check logic is correct the same at whenUpdaateUser
+    public void whenUpdateRecipe() throws Exception {
 
         long recipeId = 0;
-        RecipeDTO updatedRecipe = new RecipeDTO("Recipe2", "Description2");
+        RecipeUpdateDTO updatedRecipe = new RecipeUpdateDTO("Recipe2", "Description2");
 
         when(recipesService.updateRecipe(recipeId, updatedRecipe)).thenReturn(updatedRecipe);
 
@@ -178,9 +190,9 @@ public class RecipesControllerTest {
                 .characterEncoding("utf-8"))
                 .andExpect(status().isOk());
 
-        RecipeDTO recipeUpdatedResult = mapper.readValue(resultActions.andReturn()
+        RecipeUpdateDTO recipeUpdatedResult = mapper.readValue(resultActions.andReturn()
                 .getResponse()
-                .getContentAsString(), RecipeDTO.class);
+                .getContentAsString(), RecipeUpdateDTO.class);
 
         Assert.assertEquals(updatedRecipe, recipeUpdatedResult);
     }
@@ -189,7 +201,7 @@ public class RecipesControllerTest {
     public void whenUpdateRecipeWithInvalidId() throws Exception {
 
         long recipeId = -1;
-        RecipeDTO updatedRecipe = new RecipeDTO("Recipe2", "Description2");
+        RecipeUpdateDTO updatedRecipe = new RecipeUpdateDTO("Recipe2", "Description2");
 
         when(recipesService.updateRecipe(recipeId, updatedRecipe)).thenThrow(NotFoundException.class);
 

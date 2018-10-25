@@ -31,12 +31,20 @@ public class UsersController {
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<UserDTO>> getUsers() {
         List<UserDTO> users = usersService.getUsers();
+        if (users.isEmpty() )
+            return new ResponseEntity<>(users, HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public ResponseEntity<UserDTO> updateUser(@PathVariable long id, @Valid @RequestBody UserDTO user) throws NotFoundException {
         UserDTO updatedUser = usersService.updateUser(id, user);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<UserDTO> deleteUser(@PathVariable long id) throws NotFoundException {
+        UserDTO updatedUser = usersService.deleteUser(id);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 }

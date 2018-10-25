@@ -19,6 +19,10 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class UsersService {
+
+    private static final String USER_NOT_FOUND = "The user specified was not found.";
+    private static final String RECIPE_NOT_FOUND = "The recipe ID specified was not found.";
+
     @Autowired
     private UsersRepository usersRepository;
 
@@ -50,7 +54,7 @@ public class UsersService {
             foundUser = user.get();
         }
         else {
-            throw new NotFoundException();
+            throw new NotFoundException(USER_NOT_FOUND);
         }
 
         if( checkUserParameters(updatedUser) ) {
@@ -74,12 +78,12 @@ public class UsersService {
             foundUser = user.get();
         }
         else {
-            throw new NotFoundException();
+            throw new NotFoundException(USER_NOT_FOUND);
         }
         return MapperHelper.USER_MAPPER.convertToUserDto(foundUser);
     }
 
-    public User finUserById(long userId) throws NotFoundException {
+    public User findUserById(long userId) throws NotFoundException {
         Optional<User> user = usersRepository.findById(userId);
         User foundUser;
 
@@ -87,7 +91,7 @@ public class UsersService {
             foundUser = user.get();
         }
         else {
-            throw new NotFoundException();
+            throw new NotFoundException(USER_NOT_FOUND);
         }
         return foundUser;
     }
@@ -101,5 +105,18 @@ public class UsersService {
                 && user.getDateOfBirth() != null
                 && checkStringValue(user.getEmail())
                 && checkStringValue(user.getPassword());
+    }
+
+    public UserDTO deleteUser(long id) throws NotFoundException {
+        Optional<User> user = usersRepository.findById(id);
+        UserDTO deletedRecipe;
+        if(user.isPresent()) {
+            usersRepository.delete(user.get());
+            deletedRecipe = MapperHelper.USER_MAPPER.convertToUserDto(user.get());
+        }
+        else {
+            throw new NotFoundException(USER_NOT_FOUND);
+        }
+        return deletedRecipe;
     }
 }
